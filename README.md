@@ -1,269 +1,233 @@
-# 🏥 Medical Clinical Orientation Workflow — Multi-Agent SMA
+# Medical Clinical Orientation Workflow - Multi-Agent SMA
 
-## 🇫🇷 Français
+## Francais
 
-### Présentation
+### Presentation
 
-Système multi-agents (SMA) d'**orientation clinique préliminaire** construit avec LangGraph, LangChain, FastAPI, MCP et Streamlit. Ce projet est un **exercice strictement académique** — il ne constitue pas un dispositif médical.
+Systeme multi-agents (SMA) d'orientation clinique preliminaire construit avec LangGraph, LangChain, FastAPI, MCP, Streamlit et Groq. Ce projet est un exercice strictement academique; il ne constitue pas un dispositif medical.
 
-**⚠️ Ce système ne remplace pas une consultation médicale.**
+**Ce systeme ne remplace pas une consultation medicale.**
 
 ### Architecture
 
-```
-┌───────────────────────────────────────────────────────┐
-│                 WORKFLOW LANGGRAPH                     │
-│                                                       │
-│  START → SUPERVISOR → DIAGNOSTIC_AGENT (5 questions)  │
-│              │                                        │
-│              ├──→ PHYSICIAN_REVIEW (HITL — pause)     │
-│              │                                        │
-│              ├──→ REPORT_AGENT (rapport final)        │
-│              │                                        │
-│              └──→ FINISH                              │
-└───────────────────────────────────────────────────────┘
-        │                           │
-   FastAPI API                 MCP Server
-   (Port 8000)                (Port 8001)
-        │
-   Streamlit UI
-   (Port 8501)
+```text
+START -> SUPERVISOR -> DIAGNOSTIC_AGENT (5 questions)
+              |
+              +-> PHYSICIAN_REVIEW (HITL)
+              |
+              +-> REPORT_AGENT (rapport final)
+              |
+              +-> FINISH
+
+FastAPI API  <->  Streamlit UI
+    |
+    +-> MCP Server (lignes directrices)
 ```
 
-### Prérequis
+Services par defaut:
 
-- **Python 3.11+**
-- **Clé API Groq** (gratuite) : https://console.groq.com
-- **pip** (gestionnaire de paquets Python)
+- FastAPI: `http://localhost:8000`
+- MCP server: `http://localhost:8001`
+- Streamlit: `http://localhost:8501`
+
+Si le port `8000` est deja occupe, vous pouvez lancer FastAPI sur un autre port, par exemple `8010`, puis mettre `API_BASE_URL=http://localhost:8010` dans `.env`.
+
+### Prerequis
+
+- Python 3.11+
+- Cle API Groq: https://console.groq.com
+- pip
 
 ### Installation
 
-```bash
-# 1. Cloner ou dézipper le projet
-cd project
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project
 
-# 2. Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Linux/macOS
-# venv\Scripts\activate   # Windows
+# Si la commande python n'est pas disponible sous Windows:
+$PY="$env:LOCALAPPDATA\Programs\Python\Python311\python.exe"
+& $PY -m venv venv
 
-# 3. Installer les dépendances
-pip install -r backend/requirements.txt
+.\venv\Scripts\Activate.ps1
+.\venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 
-# 4. Configurer les variables d'environnement
-cp .env.example .env
-# Éditez .env et ajoutez votre GROQ_API_KEY
+Copy-Item .env.example .env
 ```
+
+Editez ensuite `.env`:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+LLM_MODEL=llama-3.3-70b-versatile
+FASTAPI_HOST=0.0.0.0
+FASTAPI_PORT=8000
+MCP_SERVER_HOST=localhost
+MCP_SERVER_PORT=8001
+API_BASE_URL=http://localhost:8000
+```
+
+Le modele LLM est lu automatiquement depuis `.env` via `backend/app/config.py`.
 
 ### Lancement
 
-**Étape 1 — Démarrer le serveur MCP** (terminal 1) :
-```bash
-cd project
-python -m uvicorn mcp_server.server:app --port 8001
+Terminal 1 - MCP server:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn mcp_server.server:app --port 8001
 ```
 
-**Étape 2 — Démarrer le backend FastAPI** (terminal 2) :
-```bash
-cd project
-python -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8000 --reload
+Terminal 2 - FastAPI:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-**Étape 3 — Démarrer le frontend Streamlit** (terminal 3) :
-```bash
-cd project
-streamlit run frontend/app.py
+Terminal 3 - Streamlit:
+
+```powershell
+.\venv\Scripts\streamlit.exe run frontend/app.py --server.port 8501 --server.headless true --browser.gatherUsageStats false
 ```
 
-**Étape 4 (optionnel) — Ouvrir LangGraph Studio** :
-```bash
-cd project/backend
-langgraph dev
+Ouvrir l'application:
+
+```text
+http://localhost:8501
 ```
 
-### Documentation API
+Documentation Swagger:
 
-Accédez à la documentation Swagger automatique : http://localhost:8000/docs
-
-### Comment obtenir une clé API Groq gratuite
-
-1. Rendez-vous sur https://console.groq.com
-2. Créez un compte (gratuit)
-3. Générez une clé API dans le tableau de bord
-4. Copiez la clé dans votre fichier `.env`
-
-### Scénarios de test
-
-Le projet inclut 3 scénarios de test :
-
-1. **Syndrome respiratoire simple** : Toux sèche, 3 jours → urgence medium
-2. **Red flags cardiovasculaires** : Douleur thoracique intense → urgence high
-3. **Cas bénin** : Fatigue légère → urgence low
-
-Exécuter les tests :
-```bash
-cd project
-python -m pytest tests/ -v
+```text
+http://localhost:8000/docs
 ```
 
-### Avertissement éthique
+### Fonctionnalites principales
 
-⚠️ **Ce système est une simulation académique.** Il ne constitue pas un avis médical professionnel. Ne l'utilisez jamais pour des décisions médicales réelles. Consultez toujours un professionnel de santé qualifié.
+- Questionnaire patient en 5 questions obligatoires
+- Synthese clinique preliminaire via Groq
+- Recommandation intermediaire avec appui MCP
+- Revue medecin Human-in-the-Loop
+- Rapport final structure
+- Telechargement PDF professionnel du rapport final
+- ID de session conserve dans le rapport PDF
+
+### Tests
+
+```powershell
+.\venv\Scripts\python.exe -m pytest tests\ -v
+```
+
+La suite couvre notamment:
+
+- Compilation et routage LangGraph
+- Endpoints FastAPI
+- Avancement Q1 -> Q2 du questionnaire
+- Matching MCP
+- Trois scenarios cliniques academiques
+
+### Scenarios de test
+
+1. Syndrome respiratoire simple: toux seche, 3 jours -> urgence medium
+2. Red flags cardiovasculaires: douleur thoracique intense -> urgence high
+3. Cas benin: fatigue legere -> urgence low
+
+### Avertissement ethique
+
+Ce systeme est une simulation academique. Il ne constitue pas un avis medical professionnel et ne doit jamais etre utilise pour des decisions medicales reelles.
 
 ---
 
-## 🇬🇧 English
+## English
 
 ### Overview
 
-Multi-agent system (MAS) for **preliminary clinical orientation** built with LangGraph, LangChain, FastAPI, MCP, and Streamlit. This project is a **strictly academic exercise** — it is not a medical device.
+Multi-agent system (MAS) for preliminary clinical orientation built with LangGraph, LangChain, FastAPI, MCP, Streamlit, and Groq. This project is strictly academic and is not a medical device.
 
-**⚠️ This system does not replace a medical consultation.**
+**This system does not replace a medical consultation.**
 
-### Architecture
+### Default Services
 
-```
-┌───────────────────────────────────────────────────────┐
-│                 LANGGRAPH WORKFLOW                     │
-│                                                       │
-│  START → SUPERVISOR → DIAGNOSTIC_AGENT (5 questions)  │
-│              │                                        │
-│              ├──→ PHYSICIAN_REVIEW (HITL — pause)     │
-│              │                                        │
-│              ├──→ REPORT_AGENT (final report)         │
-│              │                                        │
-│              └──→ FINISH                              │
-└───────────────────────────────────────────────────────┘
-        │                           │
-   FastAPI API                 MCP Server
-   (Port 8000)                (Port 8001)
-        │
-   Streamlit UI
-   (Port 8501)
-```
+- FastAPI: `http://localhost:8000`
+- MCP server: `http://localhost:8001`
+- Streamlit: `http://localhost:8501`
 
-### Prerequisites
-
-- **Python 3.11+**
-- **Groq API Key** (free): https://console.groq.com
-- **pip** (Python package manager)
+If port `8000` is already occupied, run FastAPI on another port such as `8010` and set `API_BASE_URL=http://localhost:8010` in `.env`.
 
 ### Installation
 
-```bash
-# 1. Clone or unzip the project
-cd project
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project
 
-# 2. Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/macOS
-# venv\Scripts\activate   # Windows
+$PY="$env:LOCALAPPDATA\Programs\Python\Python311\python.exe"
+& $PY -m venv venv
 
-# 3. Install dependencies
-pip install -r backend/requirements.txt
+.\venv\Scripts\Activate.ps1
+.\venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 
-# 4. Configure environment variables
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
+Copy-Item .env.example .env
+```
+
+Configure `.env`:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+LLM_MODEL=llama-3.3-70b-versatile
+FASTAPI_HOST=0.0.0.0
+FASTAPI_PORT=8000
+MCP_SERVER_HOST=localhost
+MCP_SERVER_PORT=8001
+API_BASE_URL=http://localhost:8000
 ```
 
 ### Running
 
-**Step 1 — Start MCP server** (terminal 1):
-```bash
-cd project
-python -m uvicorn mcp_server.server:app --port 8001
+Terminal 1:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn mcp_server.server:app --port 8001
 ```
 
-**Step 2 — Start FastAPI backend** (terminal 2):
-```bash
-cd project
-python -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8000 --reload
+Terminal 2:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-**Step 3 — Start Streamlit frontend** (terminal 3):
-```bash
-cd project
-streamlit run frontend/app.py
+Terminal 3:
+
+```powershell
+.\venv\Scripts\streamlit.exe run frontend/app.py --server.port 8501 --server.headless true --browser.gatherUsageStats false
 ```
 
-**Step 4 (optional) — Open LangGraph Studio**:
-```bash
-cd project/backend
-langgraph dev
+Open:
+
+```text
+http://localhost:8501
 ```
 
-### API Documentation
+### Project Structure
 
-Access the automatic Swagger documentation: http://localhost:8000/docs
-
-### How to get a free Groq API key
-
-1. Go to https://console.groq.com
-2. Create a free account
-3. Generate an API key from the dashboard
-4. Copy the key to your `.env` file
-
-### Test Scenarios
-
-The project includes 3 test scenarios:
-
-1. **Simple respiratory syndrome**: Dry cough, 3 days → medium urgency
-2. **Cardiovascular red flags**: Intense chest pain → high urgency
-3. **Benign case**: Mild fatigue → low urgency
-
-Run tests:
-```bash
-cd project
-python -m pytest tests/ -v
-```
-
-### Ethical Disclaimer
-
-⚠️ **This system is an academic simulation.** It does not constitute professional medical advice. Never use it for real medical decisions. Always consult a qualified healthcare professional.
-
----
-
-## Structure du Projet / Project Structure
-
-```
+```text
 project/
 ├── backend/
 │   ├── app/
-│   │   ├── __init__.py
-│   │   ├── graph.py              # LangGraph workflow
-│   │   ├── state.py              # MedicalState (TypedDict)
+│   │   ├── api.py
+│   │   ├── config.py
+│   │   ├── graph.py
+│   │   ├── state.py
 │   │   ├── nodes/
-│   │   │   ├── __init__.py
-│   │   │   ├── supervisor.py     # Deterministic routing
-│   │   │   ├── diagnostic_agent.py  # 5 questions + LLM summary
-│   │   │   ├── physician_review.py  # HITL interruption
-│   │   │   └── report_agent.py   # Final report generation
-│   │   ├── tools/
-│   │   │   ├── __init__.py
-│   │   │   ├── patient_tools.py  # ask_patient, record_answer
-│   │   │   ├── care_tools.py     # recommend_interim_care
-│   │   │   └── mcp_client.py     # MCP HTTP client
-│   │   └── api.py                # FastAPI (6 endpoints)
-│   ├── langgraph.json            # LangGraph Studio config
-│   └── requirements.txt          # Python dependencies
-├── mcp_server/
-│   ├── __init__.py
-│   ├── server.py                 # MCP FastAPI server
-│   └── data/
-│       └── care_guidelines.json  # 10 medical conditions
+│   │   └── tools/
+│   ├── langgraph.json
+│   └── requirements.txt
 ├── frontend/
-│   └── app.py                    # Streamlit (4 screens)
+│   └── app.py
+├── mcp_server/
+│   ├── server.py
+│   └── data/care_guidelines.json
 ├── tests/
-│   ├── __init__.py
-│   ├── test_graph.py             # Graph tests
-│   ├── test_api.py               # API tests
-│   └── test_scenarios.py         # 3 clinical scenarios
-├── .env.example                  # Environment template
-├── rapport_technique.md          # Technical report (FR)
-└── README.md                     # This file
+├── .env.example
+├── rapport_technique.md
+└── README.md
 ```
 
----
+### Disclaimer
 
-**⚠️ Ce système ne remplace pas une consultation médicale. / This system does not replace a medical consultation.**
+This is an academic simulation. It is not professional medical advice and must not be used for real medical decisions.

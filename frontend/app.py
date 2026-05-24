@@ -254,6 +254,12 @@ def build_report_pdf(report_json: dict, thread_id: str) -> bytes:
                 Paragraph("<b>Date</b>", small_style),
                 Paragraph(_pdf_text(generated_at), body_style),
             ],
+            [
+                Paragraph("<b>ID session</b>", small_style),
+                Paragraph(_pdf_text(thread_id), body_style),
+                "",
+                "",
+            ],
         ],
         colWidths=[2.0 * cm, 6.1 * cm, 1.7 * cm, 6.0 * cm],
     )
@@ -261,6 +267,7 @@ def build_report_pdf(report_json: dict, thread_id: str) -> bytes:
         TableStyle(
             [
                 ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F4F8FB")),
+                ("SPAN", (1, 2), (3, 2)),
                 ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#B7C9D6")),
                 ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#D6E2EA")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
