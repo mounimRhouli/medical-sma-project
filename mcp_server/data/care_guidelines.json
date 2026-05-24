@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "condition": "Syndrome respiratoire",
+    "keywords": ["toux", "fièvre", "essoufflement", "bronchite", "respiration", "poumon", "grippe", "rhume", "congestion", "expectoration"],
+    "guidelines": "Repos au lit recommandé. Hydratation abondante (eau, tisanes). Surveillance de la température. Aération régulière de la pièce. Éviter les efforts physiques. Consultation si fièvre persistante au-delà de 3 jours ou difficultés respiratoires croissantes.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Repos strict",
+      "Hydratation abondante",
+      "Surveillance de la température toutes les 4 heures",
+      "Consultation médicale si aggravation",
+      "Éviter le contact avec des personnes fragiles"
+    ]
+  },
+  {
+    "id": 2,
+    "condition": "Troubles digestifs",
+    "keywords": ["nausée", "vomissement", "diarrhée", "douleur abdominale", "estomac", "ventre", "ballonnement", "crampe", "indigestion", "gastrique"],
+    "guidelines": "Régime alimentaire léger et fractionné. Hydratation par petites quantités fréquentes (eau, bouillons). Éviter les aliments gras, épicés et les produits laitiers. Repos digestif de 24h si vomissements. Surveillance de la déshydratation.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Régime alimentaire léger",
+      "Hydratation fractionnée",
+      "Repos digestif",
+      "Surveillance des signes de déshydratation",
+      "Consultation si symptômes persistants au-delà de 48h"
+    ]
+  },
+  {
+    "id": 3,
+    "condition": "Urgence cardiovasculaire",
+    "keywords": ["douleur thoracique", "palpitations", "coeur", "poitrine", "oppression", "tachycardie", "essoufflement", "malaise", "syncope", "tension"],
+    "guidelines": "ATTENTION — URGENCE POTENTIELLE. Repos immédiat en position semi-assise. Ne pas faire d'effort physique. Appeler les services d'urgence (15/SAMU) immédiatement en cas de douleur thoracique intense, irradiation vers le bras gauche, ou malaise avec perte de connaissance. Surveillance continue des signes vitaux.",
+    "urgency": "high",
+    "recommended_actions": [
+      "Appel immédiat aux services d'urgence (15/SAMU)",
+      "Repos strict en position semi-assise",
+      "Ne pas administrer de médicaments sans avis médical",
+      "Surveillance continue",
+      "Consultation urgente impérative"
+    ]
+  },
+  {
+    "id": 4,
+    "condition": "Troubles musculosquelettiques",
+    "keywords": ["douleur dorsale", "articulation", "entorse", "muscle", "dos", "genou", "épaule", "raideur", "lombalgie", "cervicale"],
+    "guidelines": "Application de froid (glace enveloppée) sur la zone douloureuse pendant 15-20 minutes. Repos relatif avec mobilisation douce. Éviter les positions prolongées. Surélever le membre si gonflement. Consultation si douleur persistante ou limitation fonctionnelle importante.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Application de froid local",
+      "Repos relatif",
+      "Mobilisation douce progressive",
+      "Surélévation si gonflement",
+      "Consultation si persistance au-delà de 5 jours"
+    ]
+  },
+  {
+    "id": 5,
+    "condition": "Urgence neurologique",
+    "keywords": ["céphalée sévère", "vertiges", "confusion", "migraine", "tête", "engourdissement", "paralysie", "vision", "évanouissement", "convulsion"],
+    "guidelines": "ATTENTION — URGENCE POTENTIELLE. Repos dans un environnement calme et sombre. Ne pas conduire. Appeler les services d'urgence immédiatement en cas de céphalée brutale et intense (« coup de tonnerre »), confusion, troubles de la parole, paralysie d'un côté du corps, ou convulsions.",
+    "urgency": "high",
+    "recommended_actions": [
+      "Appel immédiat aux services d'urgence si signes d'alerte",
+      "Repos en environnement calme et sombre",
+      "Ne pas conduire ni utiliser de machines",
+      "Surveillance de l'état de conscience",
+      "Consultation urgente si symptômes neurologiques focaux"
+    ]
+  },
+  {
+    "id": 6,
+    "condition": "Troubles dermatologiques",
+    "keywords": ["éruption", "démangeaison", "rougeur", "peau", "bouton", "urticaire", "eczéma", "allergie", "gonflement", "irritation"],
+    "guidelines": "Éviter de gratter les lésions. Appliquer des compresses fraîches sur les zones irritées. Porter des vêtements amples en coton. Éviter les produits irritants (savons parfumés, lessives agressives). Surveillance de l'étendue des lésions. Consultation si extension rapide ou signes généraux associés.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Compresses fraîches locales",
+      "Éviter les irritants cutanés",
+      "Vêtements amples en fibres naturelles",
+      "Surveillance de l'extension des lésions",
+      "Consultation si aggravation rapide ou fièvre associée"
+    ]
+  },
+  {
+    "id": 7,
+    "condition": "Troubles ORL",
+    "keywords": ["maux de gorge", "otite", "sinusite", "rhinite", "oreille", "nez", "gorge", "angine", "pharyngite", "enrouement"],
+    "guidelines": "Gargarismes à l'eau salée tiède pour les maux de gorge. Lavages nasaux au sérum physiologique pour la rhinite/sinusite. Hydratation abondante. Éviter les environnements enfumés. Repos vocal si enrouement. Surveillance de la fièvre.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Gargarismes à l'eau salée tiède",
+      "Lavages nasaux au sérum physiologique",
+      "Hydratation abondante",
+      "Repos vocal si nécessaire",
+      "Consultation si fièvre élevée ou symptômes persistants au-delà de 5 jours"
+    ]
+  },
+  {
+    "id": 8,
+    "condition": "Troubles urologiques",
+    "keywords": ["brûlure urinaire", "fréquence", "douleur lombaire", "urine", "miction", "cystite", "rein", "infection urinaire", "sang", "incontinence"],
+    "guidelines": "Hydratation abondante (au moins 2 litres d'eau par jour). Mictions régulières, ne pas se retenir. Éviter les boissons irritantes (café, alcool, sodas). Hygiène intime soignée. Consultation rapide recommandée pour analyse d'urine et traitement adapté.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Hydratation abondante (2L/jour minimum)",
+      "Mictions fréquentes et régulières",
+      "Éviter café, alcool et boissons sucrées",
+      "Hygiène intime soignée",
+      "Consultation médicale rapide recommandée"
+    ]
+  },
+  {
+    "id": 9,
+    "condition": "Troubles ophtalmologiques",
+    "keywords": ["douleur oculaire", "vision floue", "rougeur oeil", "oeil", "yeux", "larmoiement", "photophobie", "conjonctivite", "sécheresse", "corps étranger"],
+    "guidelines": "Ne pas frotter les yeux. Rincer abondamment à l'eau claire ou au sérum physiologique en cas de corps étranger ou d'irritation. Protéger les yeux de la lumière vive. Éviter les écrans. Consultation ophtalmologique recommandée en cas de douleur intense, baisse de vision, ou rougeur persistante.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Ne pas frotter les yeux",
+      "Rinçage au sérum physiologique",
+      "Protection contre la lumière vive",
+      "Limiter l'exposition aux écrans",
+      "Consultation ophtalmologique si douleur ou baisse de vision"
+    ]
+  },
+  {
+    "id": 10,
+    "condition": "Symptômes généraux bénins",
+    "keywords": ["fatigue", "stress", "insomnie", "légère fièvre", "asthénie", "anxiété", "tension", "surmenage", "épuisement", "mal-être"],
+    "guidelines": "Repos suffisant et régulier (7-9h de sommeil par nuit). Activité physique douce et régulière (marche, yoga). Alimentation équilibrée et variée. Techniques de gestion du stress (respiration profonde, méditation). Limiter la consommation de stimulants. Surveillance de l'évolution des symptômes.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Repos régulier et suffisant",
+      "Activité physique douce",
+      "Alimentation équilibrée",
+      "Techniques de relaxation",
+      "Consultation si persistance au-delà de 2 semaines"
+    ]
+  }
+]
