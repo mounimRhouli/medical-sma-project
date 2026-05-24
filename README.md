@@ -111,6 +111,75 @@ Documentation Swagger:
 http://localhost:8000/docs
 ```
 
+### LangGraph Studio
+
+LangGraph Studio permet d'inspecter le graphe `medical_workflow`, ses noeuds et ses transitions. Le projet utilise un point d'entree dedie pour Studio:
+
+```text
+backend/studio_graph.py
+```
+
+Ce fichier est necessaire parce que l'application FastAPI utilise des imports absolus (`backend.app...`) et un checkpointer `MemorySaver`, alors que LangGraph Studio gere sa propre persistence.
+
+Installer le CLI Studio si besoin:
+
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project
+.\venv\Scripts\python.exe -m pip install -U "langgraph-cli[inmem]"
+```
+
+Verifier la configuration:
+
+```json
+{
+  "dependencies": ["."],
+  "graphs": {
+    "medical_workflow": "./studio_graph.py:medical_graph"
+  },
+  "env": "../.env"
+}
+```
+
+Lancer Studio depuis le dossier `backend`:
+
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project\backend
+..\venv\Scripts\python.exe -m langgraph_cli dev
+```
+
+Quand le serveur demarre, gardez ce terminal ouvert. Il doit afficher:
+
+```text
+API: http://127.0.0.1:2024
+Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+API Docs: http://127.0.0.1:2024/docs
+```
+
+Tester d'abord l'API locale dans un deuxieme terminal:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:2024/docs
+```
+
+Si le status est `200`, ouvrir Studio:
+
+```text
+https://smith.langchain.com/studio/?baseUrl=http://localhost:2024
+```
+
+Si Studio indique encore "Connection failed" alors que `/docs` fonctionne, essayez:
+
+```text
+https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+```
+
+Conseils de diagnostic:
+
+- Si `Invoke-WebRequest http://localhost:2024/docs` echoue, le serveur LangGraph n'est pas lance.
+- Si le terminal revient au prompt PowerShell, le serveur est arrete.
+- Gardez le terminal `langgraph_cli dev` ouvert pendant toute l'utilisation de Studio.
+- Essayez Chrome ou Edge et desactivez temporairement les extensions qui bloquent les requetes locales.
+
 ### Fonctionnalites principales
 
 - Questionnaire patient en 5 questions obligatoires
@@ -227,6 +296,42 @@ Open:
 http://localhost:8501
 ```
 
+### LangGraph Studio
+
+LangGraph Studio is used to inspect the `medical_workflow` graph. This project uses a dedicated Studio entrypoint:
+
+```text
+backend/studio_graph.py
+```
+
+Install the CLI if needed:
+
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project
+.\venv\Scripts\python.exe -m pip install -U "langgraph-cli[inmem]"
+```
+
+Run Studio from the `backend` folder:
+
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project\backend
+..\venv\Scripts\python.exe -m langgraph_cli dev
+```
+
+Keep that terminal open. In another terminal, verify the local Agent Server:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:2024/docs
+```
+
+If it returns `200`, open:
+
+```text
+https://smith.langchain.com/studio/?baseUrl=http://localhost:2024
+```
+
+If the hosted Studio page cannot connect but `/docs` works, try `127.0.0.1` instead of `localhost`, use Chrome or Edge, and disable browser extensions that block local requests.
+
 ### Project Structure
 
 ```text
@@ -240,6 +345,7 @@ project/
 │   │   ├── nodes/
 │   │   └── tools/
 │   ├── langgraph.json
+│   ├── studio_graph.py
 │   └── requirements.txt
 ├── frontend/
 │   └── app.py

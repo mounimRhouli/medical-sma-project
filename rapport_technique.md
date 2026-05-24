@@ -141,6 +141,8 @@ Le projet utilise deux niveaux d'etat:
 
 Ce store API en memoire evite les problemes de reprise apres un `END` checkpoint LangGraph dans le flux question par question. Il convient pour une demonstration academique locale. Pour une version de production, il faudrait le remplacer par Redis, PostgreSQL ou un checkpointer persistant adapte au mode interactif.
 
+Le graphe applicatif expose dans `backend/app/graph.py` reste compile avec `MemorySaver`, car il est utilise par FastAPI pour conserver l'etat local des consultations pendant la demonstration.
+
 Champs principaux de `MedicalState`:
 
 | Champ | Description |
@@ -156,7 +158,62 @@ Champs principaux de `MedicalState`:
 | `consultation_status` | Statut courant |
 | `thread_id` | ID de session |
 
-## 7. API FastAPI
+## 7. LangGraph Studio
+
+LangGraph Studio est utilise pour inspecter le graphe `medical_workflow`, visualiser ses noeuds et tester les transitions.
+
+Le projet utilise un point d'entree dedie:
+
+```text
+backend/studio_graph.py
+```
+
+Ce fichier ajoute la racine du projet au `sys.path`, puis reconstruit le graphe avec:
+
+```python
+medical_graph = build_graph().compile(
+    interrupt_before=["physician_review"],
+)
+```
+
+Cette version Studio ne fournit pas de checkpointer custom. C'est volontaire: LangGraph API/Studio gere sa propre persistence et refuse les graphes exportes avec un `MemorySaver` explicite.
+
+La configuration Studio est:
+
+```json
+{
+  "dependencies": ["."],
+  "graphs": {
+    "medical_workflow": "./studio_graph.py:medical_graph"
+  },
+  "env": "../.env"
+}
+```
+
+Le champ `env` pointe vers `../.env` parce que la commande Studio est lancee depuis `backend`, alors que le fichier `.env` se trouve a la racine du projet.
+
+Commande de lancement:
+
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project\backend
+..\venv\Scripts\python.exe -m langgraph_cli dev
+```
+
+Avant d'ouvrir l'interface Studio, il est recommande de verifier que l'Agent Server repond:
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://localhost:2024/docs
+```
+
+Un status `200` confirme que le serveur local est actif. L'interface Studio peut ensuite etre ouverte avec:
+
+```text
+https://smith.langchain.com/studio/?baseUrl=http://localhost:2024
+```
+
+Si l'interface affiche "Connection failed" alors que `/docs` fonctionne, le probleme vient generalement du navigateur ou d'une extension qui bloque les requetes locales. Les contournements possibles sont: utiliser Chrome/Edge, desactiver les bloqueurs, essayer `http://127.0.0.1:2024`, ou relancer le serveur en gardant le terminal ouvert.
+
+## 8. API FastAPI
 
 Endpoints disponibles:
 
@@ -183,7 +240,7 @@ Gestion d'erreur:
 - 500 pour les erreurs internes.
 - Les erreurs LLM sont capturees et remplacent la sortie par un message de fallback prudent.
 
-## 8. Serveur MCP
+## 9. Serveur MCP
 
 Fichier: `mcp_server/server.py`
 
@@ -200,7 +257,7 @@ Endpoints:
 
 La recherche repose sur une tokenisation simple, une suppression de stop words et un score de recouvrement de mots cles.
 
-## 9. Frontend Streamlit
+## 10. Frontend Streamlit
 
 Fichier: `frontend/app.py`
 
@@ -217,7 +274,7 @@ Fonctions recentes:
 - Le rapport final peut etre telecharge en PDF.
 - Le PDF contient une reference courte, l'ID de session complet, les informations patient, les questions/reponses, la synthese, la recommandation, l'avis medecin, la conclusion et l'avertissement legal.
 
-## 10. Rapport PDF
+## 11. Rapport PDF
 
 Le PDF est genere avec ReportLab dans `build_report_pdf()`.
 
@@ -237,7 +294,7 @@ L'ancien telechargement `.txt` a ete remplace par:
 Telecharger le rapport (.pdf)
 ```
 
-## 11. Tests
+## 12. Tests
 
 La suite de tests contient:
 
@@ -257,7 +314,7 @@ Etat courant apres mise a jour:
 53 tests passent
 ```
 
-## 12. Scenarios cliniques academiques
+## 13. Scenarios cliniques academiques
 
 | Scenario | Entree | Attendu |
 | --- | --- | --- |
@@ -265,7 +322,7 @@ Etat courant apres mise a jour:
 | Red flags cardiovasculaires | Douleur thoracique intense | Urgence high |
 | Cas benin | Fatigue legere | Urgence low |
 
-## 13. Limites connues
+## 14. Limites connues
 
 - `API_SESSION_STATES` est en memoire: les sessions disparaissent au redemarrage du backend.
 - Le systeme n'est pas securise par authentification.
@@ -273,7 +330,7 @@ Etat courant apres mise a jour:
 - Les sorties LLM dependent de la disponibilite de Groq et du modele configure dans `.env`.
 - Le systeme ne doit pas etre utilise comme avis medical.
 
-## 14. Perspectives
+## 15. Perspectives
 
 - Remplacer le store en memoire par Redis ou PostgreSQL.
 - Ajouter une authentification pour le role medecin.
@@ -282,7 +339,7 @@ Etat courant apres mise a jour:
 - Ajouter un export PDF multilingue.
 - Containeriser l'application.
 
-## 15. Conclusion
+## 16. Conclusion
 
 Le projet illustre un workflow multi-agents medical academique avec un questionnaire structure, une synthese LLM, une recommandation outillee par MCP, une revue humaine et un rapport final professionnel. Les dernieres modifications alignent le code avec une configuration `.env` centralisee, un modele Groq actuel, un export PDF professionnel et une API interactive plus robuste.
 
