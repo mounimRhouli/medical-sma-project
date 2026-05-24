@@ -8,7 +8,6 @@ import uuid
 import os
 import time
 import functools
-from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -18,14 +17,14 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-from backend.app.logging_config import setup_logging
+from backend.app.logging_config import setup_logging  # noqa: E402
 setup_logging()
 
-from backend.app.graph import medical_graph, checkpointer
-from backend.app.state import MedicalState
-from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS
-from backend.app.database import init_db, get_consultation as db_get_consultation, get_all_consultations
-from backend.app.exceptions import (
+from backend.app.graph import medical_graph  # noqa: E402
+from backend.app.state import MedicalState  # noqa: E402
+from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS  # noqa: E402
+from backend.app.database import init_db, get_consultation as db_get_consultation, get_all_consultations  # noqa: E402
+from backend.app.exceptions import (  # noqa: E402
     SMABaseError,
     ConsultationNotFoundError,
     ReportNotReadyError,
@@ -175,9 +174,8 @@ async def start_consultation(request: ConsultationStartRequest):
     }
 
     try:
-        result = None
         for event in medical_graph.stream(initial_state, config=config):
-            result = event
+            pass
 
         state = medical_graph.get_state(config)
         current_state = state.values

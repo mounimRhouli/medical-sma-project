@@ -12,7 +12,6 @@ import os
 import sys
 import json
 import re
-from typing import List, Optional
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
 

@@ -117,10 +117,10 @@ def diagnostic_agent_node(state: MedicalState) -> dict:
 
         summary_message = SystemMessage(
             content=(
-                f"[Agent d'orientation clinique préliminaire] "
-                f"Synthèse clinique préliminaire générée. "
-                f"Recommandation intermédiaire produite. "
-                f"En attente de la revue du médecin traitant."
+                "[Agent d'orientation clinique préliminaire] "
+                "Synthèse clinique préliminaire générée. "
+                "Recommandation intermédiaire produite. "
+                "En attente de la revue du médecin traitant."
             )
         )
 

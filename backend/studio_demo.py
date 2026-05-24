@@ -22,12 +22,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # noqa: E402
 load_dotenv()
 
-from langchain_core.messages import HumanMessage
-from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS
-from backend.studio_graph import medical_graph_debug as graph
+from langchain_core.messages import HumanMessage  # noqa: E402
+from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS  # noqa: E402
+from backend.studio_graph import medical_graph_debug as graph  # noqa: E402
 
 
 SEPARATOR = "=" * 70
@@ -190,8 +190,8 @@ def run_scenario(scenario: dict) -> None:
     print_state("Après synthèse (HITL interrupt)", state.values)
 
     # --- Étape 7 : Interruption HITL — le graphe est en pause ---
-    print(f"\n>>> Étape 7 : INTERRUPTION HITL — En attente du médecin")
-    print(f"    État du graphe : interrompu avant 'physician_review'")
+    print("\n>>> Étape 7 : INTERRUPTION HITL — En attente du médecin")
+    print("    État du graphe : interrompu avant 'physician_review'")
     print(f"    next={state.next}")
 
     # --- Étape 8 : Avis du médecin ---

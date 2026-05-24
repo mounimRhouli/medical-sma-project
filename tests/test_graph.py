@@ -3,7 +3,6 @@ Tests for the LangGraph medical workflow graph.
 Tests graph compilation, supervisor routing, and state transitions.
 """
 
-import pytest
 from backend.app.state import MedicalState
 from backend.app.nodes.supervisor import supervisor_node
 from backend.app.graph import build_graph, medical_graph, checkpointer

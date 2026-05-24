@@ -5,7 +5,6 @@ Note: These tests require GROQ_API_KEY to be set for LLM calls.
 Tests that require API calls are marked with pytest.mark.integration.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 from backend.app.api import app
 from backend.app.nodes.supervisor import supervisor_node

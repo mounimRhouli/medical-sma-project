@@ -3,8 +3,6 @@ Report Agent Node — Generates the final structured clinical report
 using Groq LLM, with Pydantic structured output.
 """
 
-import json
-import os
 from datetime import datetime
 from langchain_core.messages import SystemMessage
 from langchain_groq import ChatGroq
