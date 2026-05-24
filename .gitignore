@@ -1,12 +1,9 @@
 
-# # Environment files
+# Environment files
 .env
 
 # Python virtual environment
 venv/
-
-# Environment variables
-.env
 
 # Python cache
 __pycache__/
@@ -14,3 +11,15 @@ __pycache__/
 
 # IDE
 .vscode/
+
+# Database
+backend/data/consultations.db
+
+# Logs
+logs/
+
+# LangGraph Studio cache
+backend/.langgraph_api/
+
+# Legacy JSON history
+backend/consultations_history.json

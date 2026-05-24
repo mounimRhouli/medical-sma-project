@@ -3,20 +3,38 @@ FastAPI API — Medical Clinical Orientation Workflow REST API.
 Provides 6 endpoints for managing medical consultations with the multi-agent system.
 """
 
+import logging
 import uuid
 import os
+import time
+import functools
 from typing import Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+from backend.app.logging_config import setup_logging
+setup_logging()
+
 from backend.app.graph import medical_graph, checkpointer
 from backend.app.state import MedicalState
 from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS
+from backend.app.database import init_db, get_consultation as db_get_consultation, get_all_consultations
+from backend.app.exceptions import (
+    SMABaseError,
+    ConsultationNotFoundError,
+    ReportNotReadyError,
+    GraphExecutionError,
+)
+
+logger = logging.getLogger(__name__)
+
+init_db()
 
 app = FastAPI(
     title="SMA Clinique — API d'Orientation Médicale Simulée",
@@ -34,6 +52,46 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(SMABaseError)
+async def sma_exception_handler(request: Request, exc: SMABaseError):
+    """Global handler for all custom SMA exceptions."""
+    status_map = {
+        "CONSULTATION_NOT_FOUND": 404,
+        "REPORT_NOT_READY": 404,
+        "CONSULTATION_EXISTS": 409,
+        "VALIDATION_ERROR": 422,
+        "LLM_ERROR": 502,
+        "MCP_UNAVAILABLE": 503,
+        "GRAPH_EXECUTION_ERROR": 500,
+        "DATABASE_ERROR": 500,
+    }
+    status_code = status_map.get(exc.error_code, 500)
+    logger.error("SMA Error [%s]: %s", exc.error_code, exc.message)
+    return JSONResponse(status_code=status_code, content=exc.to_dict())
+
+
+def retry_on_failure(max_retries: int = 2, delay: float = 1.0):
+    """Decorator that retries a function on transient failures."""
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            last_error = None
+            for attempt in range(max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except (ConnectionError, TimeoutError, OSError) as e:
+                    last_error = e
+                    if attempt < max_retries:
+                        logger.warning(
+                            "Tentative %d/%d échouée pour %s : %s",
+                            attempt + 1, max_retries + 1, func.__name__, e,
+                        )
+                        time.sleep(delay * (attempt + 1))
+            raise last_error
+        return wrapper
+    return decorator
 
 API_SESSION_STATES: dict[str, MedicalState] = {}
 
@@ -133,10 +191,8 @@ async def start_consultation(request: ConsultationStartRequest):
             "total_questions": 5,
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erreur lors du démarrage de la consultation : {str(e)}",
-        )
+        logger.error("Erreur démarrage consultation %s: %s", request.thread_id, e)
+        raise GraphExecutionError("démarrage de la consultation", str(e))
 
 
 @app.post("/consultation/resume")
@@ -155,10 +211,7 @@ async def resume_consultation(request: ConsultationResumeRequest):
             current_state = state.values if state else None
 
         if not current_state:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Aucune consultation trouvée pour le thread_id : {request.thread_id}",
-            )
+            raise ConsultationNotFoundError(request.thread_id)
 
         if request.role == "patient":
             question_count = current_state.get("question_count", 0)
@@ -254,13 +307,11 @@ async def resume_consultation(request: ConsultationResumeRequest):
                 "message": "Avis médecin enregistré. Génération du rapport final...",
             }
 
-    except HTTPException:
+    except (SMABaseError, HTTPException):
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erreur lors de la reprise de la consultation : {str(e)}",
-        )
+        logger.error("Erreur reprise consultation %s: %s", request.thread_id, e)
+        raise GraphExecutionError("reprise de la consultation", str(e))
 
 
 @app.get("/consultation/{thread_id}")
@@ -277,10 +328,7 @@ async def get_consultation_status(thread_id: str):
             current_state = state.values if state else None
 
         if not current_state:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Aucune consultation trouvée pour le thread_id : {thread_id}",
-            )
+            raise ConsultationNotFoundError(thread_id)
 
         return {
             "thread_id": thread_id,
@@ -292,13 +340,11 @@ async def get_consultation_status(thread_id: str):
             "physician_treatment": current_state.get("physician_treatment", ""),
             "has_final_report": bool(current_state.get("final_report")),
         }
-    except HTTPException:
+    except SMABaseError:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erreur lors de la récupération de l'état : {str(e)}",
-        )
+        logger.error("Erreur récupération état %s: %s", thread_id, e)
+        raise GraphExecutionError("récupération de l'état", str(e))
 
 
 @app.get("/consultation/{thread_id}/report")
@@ -316,18 +362,12 @@ async def get_consultation_report(thread_id: str):
             current_state = state.values if state else None
 
         if not current_state:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Aucune consultation trouvée pour le thread_id : {thread_id}",
-            )
+            raise ConsultationNotFoundError(thread_id)
 
         final_report = current_state.get("final_report", "")
 
         if not final_report:
-            raise HTTPException(
-                status_code=404,
-                detail="Le rapport final n'est pas encore généré pour cette consultation.",
-            )
+            raise ReportNotReadyError(thread_id)
 
         return {
             "thread_id": thread_id,
@@ -336,12 +376,51 @@ async def get_consultation_report(thread_id: str):
             "final_report_json": current_state.get("final_report_json", {}),
             "disclaimer": "⚠️ Ce système ne remplace pas une consultation médicale.",
         }
+    except SMABaseError:
+        raise
+    except Exception as e:
+        logger.error("Erreur récupération rapport %s: %s", thread_id, e)
+        raise GraphExecutionError("récupération du rapport", str(e))
+
+
+@app.get("/consultations/history")
+async def get_consultations_history():
+    """
+    Retourne l'historique de toutes les consultations (base SQLite).
+    """
+    try:
+        consultations = get_all_consultations()
+        return {
+            "status": "success",
+            "total": len(consultations),
+            "consultations": consultations,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de la r\u00e9cup\u00e9ration de l'historique : {str(e)}",
+        )
+
+
+@app.get("/consultations/history/{thread_id}")
+async def get_consultation_history(thread_id: str):
+    """
+    Retourne les d\u00e9tails d'une consultation archiv\u00e9e en base SQLite.
+    """
+    try:
+        consultation = db_get_consultation(thread_id)
+        if not consultation:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Aucune consultation archiv\u00e9e pour le thread_id : {thread_id}",
+            )
+        return {"status": "success", "consultation": consultation}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Erreur lors de la récupération du rapport : {str(e)}",
+            detail=f"Erreur lors de la r\u00e9cup\u00e9ration de la consultation : {str(e)}",
         )
 
 

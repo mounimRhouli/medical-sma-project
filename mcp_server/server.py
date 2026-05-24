@@ -7,6 +7,7 @@ Mode 2 (--mcp): Official MCP SDK server over stdio (for MCP-compatible clients).
 Both modes share the same guidelines data and matching logic.
 """
 
+import logging
 import os
 import sys
 import json
@@ -14,6 +15,8 @@ import re
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 GUIDELINES_FILE = os.path.join(DATA_DIR, "care_guidelines.json")
@@ -25,7 +28,7 @@ def _load_guidelines() -> list:
         with open(GUIDELINES_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Erreur lors du chargement des lignes directrices : {e}")
+        logger.error("Erreur lors du chargement des lignes directrices : %s", e)
         return []
 
 

@@ -11,6 +11,11 @@ from langchain_groq import ChatGroq
 
 from backend.app.config import get_groq_api_key, get_llm_model
 from backend.app.state import MedicalState, FinalReportModel
+from backend.app.database import save_consultation
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 def _get_llm() -> ChatGroq:
     """Initialise le modèle Groq LLM."""
@@ -101,32 +106,12 @@ def _format_report(
 
 
 def _save_consultation_history(report_json: dict, thread_id: str) -> None:
-    """Sauvegarde l'historique de la consultation dans un fichier JSON."""
-    history_file = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-        "consultations_history.json",
-    )
-
-    history = []
-    if os.path.exists(history_file):
-        try:
-            with open(history_file, "r", encoding="utf-8") as f:
-                history = json.load(f)
-        except (json.JSONDecodeError, IOError):
-            history = []
-
-    entry = {
-        "thread_id": thread_id,
-        "timestamp": datetime.now().isoformat(),
-        "report": report_json,
-    }
-    history.append(entry)
-
+    """Sauvegarde l'historique de la consultation dans la base SQLite."""
     try:
-        with open(history_file, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-    except IOError:
-        pass
+        save_consultation(thread_id, report_json)
+        logger.info("Consultation %s sauvegardée en base de données.", thread_id)
+    except Exception as e:
+        logger.error("Erreur lors de la sauvegarde en base : %s", e)
 
 
 def report_agent_node(state: MedicalState) -> dict:

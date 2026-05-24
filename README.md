@@ -10,18 +10,46 @@ Systeme multi-agents (SMA) d'orientation clinique preliminaire construit avec La
 
 ### Architecture
 
-```text
-START -> SUPERVISOR -> DIAGNOSTIC_AGENT (5 questions)
-              |
-              +-> PHYSICIAN_REVIEW (HITL)
-              |
-              +-> REPORT_AGENT (rapport final)
-              |
-              +-> FINISH
+#### Graphe LangGraph
 
-FastAPI API  <->  Streamlit UI
-    |
-    +-> MCP Server (lignes directrices)
+```mermaid
+graph TD
+    START((START)) --> SUPERVISOR
+
+    SUPERVISOR -->|question_count < 5| DIAGNOSTIC_AGENT
+    SUPERVISOR -->|5 questions + synthese| PHYSICIAN_REVIEW
+    SUPERVISOR -->|avis medecin recu| REPORT_AGENT
+    SUPERVISOR -->|rapport final| FINISH((END))
+    SUPERVISOR -.->|attente reponse patient| FINISH
+
+    DIAGNOSTIC_AGENT -->|"Phase 1: pose question<br/>Phase 2: synthese + MCP"| SUPERVISOR
+    PHYSICIAN_REVIEW -->|"HITL: avis medecin"| SUPERVISOR
+    REPORT_AGENT -->|"rapport final + PDF"| SUPERVISOR
+
+    style START fill:#4CAF50,color:#fff
+    style FINISH fill:#f44336,color:#fff
+    style SUPERVISOR fill:#2196F3,color:#fff
+    style DIAGNOSTIC_AGENT fill:#FF9800,color:#fff
+    style PHYSICIAN_REVIEW fill:#9C27B0,color:#fff
+    style REPORT_AGENT fill:#009688,color:#fff
+```
+
+#### Architecture des services
+
+```mermaid
+graph LR
+    STREAMLIT[Streamlit UI<br/>:8501] <-->|HTTP| FASTAPI[FastAPI API<br/>:8000]
+    FASTAPI -->|HTTP / MCP SDK| MCP[MCP Server<br/>:8001]
+    FASTAPI -->|LangGraph| GRAPH[StateGraph<br/>MemorySaver]
+    FASTAPI -->|SQLite| DB[(consultations.db)]
+    MCP -->|JSON| DATA[care_guidelines.json]
+
+    style STREAMLIT fill:#FF6B6B,color:#fff
+    style FASTAPI fill:#4ECDC4,color:#fff
+    style MCP fill:#45B7D1,color:#fff
+    style GRAPH fill:#96CEB4,color:#fff
+    style DB fill:#FFEAA7,color:#333
+    style DATA fill:#DDA0DD,color:#333
 ```
 
 Services par defaut:
@@ -70,7 +98,24 @@ API_BASE_URL=http://localhost:8000
 
 Le modele LLM est lu automatiquement depuis `.env` via `backend/app/config.py`.
 
-### Lancement
+### Lancement avec Docker (recommande)
+
+```powershell
+docker-compose up --build
+```
+
+Cela lance les 3 services automatiquement:
+- MCP server: `http://localhost:8001`
+- FastAPI API: `http://localhost:8000`
+- Streamlit UI: `http://localhost:8501`
+
+Pour arreter:
+
+```powershell
+docker-compose down
+```
+
+### Lancement manuel
 
 Terminal 1 - MCP server (mode HTTP REST):
 
