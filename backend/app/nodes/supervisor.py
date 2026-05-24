@@ -16,7 +16,8 @@ def supervisor_node(state: MedicalState) -> dict:
       1. Si le rapport final existe → FINISH
       2. Si le médecin a fourni son avis → report_agent
       3. Si les 5 questions sont posées et la synthèse est faite → physician_review
-      4. Sinon → diagnostic_agent
+      4. Si une question vient d'être posée → FINISH temporaire
+      5. Sinon → diagnostic_agent
     """
     final_report = state.get("final_report", "")
     physician_treatment = state.get("physician_treatment", "")
@@ -39,7 +40,7 @@ def supervisor_node(state: MedicalState) -> dict:
     elif question_count > len(questions_and_answers):
         next_node = "FINISH"
         consultation_status = "questioning"
-        routing_reason = "Question posee. En attente de la reponse patient."
+        routing_reason = "Question posée. En attente de la réponse patient."
     else:
         next_node = "diagnostic_agent"
         consultation_status = "questioning" if question_count > 0 else "started"

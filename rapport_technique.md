@@ -34,6 +34,18 @@ Services par defaut:
 
 Le frontend lit `API_BASE_URL` depuis `.env`. Si le port FastAPI par defaut est indisponible, le backend peut etre lance sur un autre port, par exemple `8010`, puis `API_BASE_URL` doit etre mis a jour.
 
+Exemple de fallback local:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8010 --reload
+```
+
+Configuration associee dans `.env`:
+
+```env
+API_BASE_URL=http://localhost:8010
+```
+
 ## 3. Configuration
 
 La configuration applicative est centralisee dans `backend/app/config.py`.

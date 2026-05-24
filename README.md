@@ -81,6 +81,18 @@ Terminal 2 - FastAPI:
 .\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8000 --reload
 ```
 
+Si le port `8000` reste bloque ou deja utilise, lancez plutot:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8010 --reload
+```
+
+Dans ce cas, mettez aussi a jour votre fichier `.env`:
+
+```env
+API_BASE_URL=http://localhost:8010
+```
+
 Terminal 3 - Streamlit:
 
 ```powershell
@@ -189,6 +201,18 @@ Terminal 2:
 
 ```powershell
 .\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8000 --reload
+```
+
+If port `8000` is blocked or already used, run:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn backend.app.api:app --host 0.0.0.0 --port 8010 --reload
+```
+
+Then update your real `.env`:
+
+```env
+API_BASE_URL=http://localhost:8010
 ```
 
 Terminal 3:

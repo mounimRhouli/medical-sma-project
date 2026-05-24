@@ -9,6 +9,7 @@ from langchain_groq import ChatGroq
 from backend.app.config import get_groq_api_key, get_llm_model
 from backend.app.tools.mcp_client import get_care_guidelines_sync
 
+
 def _get_llm() -> ChatGroq:
     """Initialise le modèle Groq LLM."""
     return ChatGroq(

@@ -19,6 +19,7 @@ MANDATORY_QUESTIONS = [
     "Prenez-vous actuellement des médicaments ? Si oui, lesquels ?",
 ]
 
+
 def _get_llm() -> ChatGroq:
     """Initialise le modèle Groq LLM."""
     return ChatGroq(
