@@ -189,6 +189,30 @@ Conseils de diagnostic:
 - Gardez le terminal `langgraph_cli dev` ouvert pendant toute l'utilisation de Studio.
 - Essayez Chrome ou Edge et desactivez temporairement les extensions qui bloquent les requetes locales.
 
+### Demonstration Studio (3 scenarios)
+
+Le script `backend/studio_demo.py` execute les 3 scenarios du cahier des charges a travers le graphe complet et affiche les transitions entre noeuds, les etats intermediaires et les interruptions HITL:
+
+```powershell
+cd C:\Users\NITRO\Downloads\medical-sma-project
+.\venv\Scripts\python.exe -m backend.studio_demo
+```
+
+Le script demontre:
+
+1. **Scenario 1** — Syndrome respiratoire simple (toux seche, 4/10, aucun antecedent)
+2. **Scenario 2** — Red flags cardiovasculaires (douleur thoracique, 9/10, hypertendu)
+3. **Scenario 3** — Cas benin (fatigue legere, 2/10, vitamines)
+
+Pour chaque scenario, les etapes suivantes sont tracees:
+
+- Demarrage de la consultation (START → Supervisor → DiagnosticAgent)
+- Collecte des 5 reponses patient (Q1 a Q5)
+- Generation de la synthese clinique preliminaire
+- Interruption HITL (pause avant PhysicianReview)
+- Injection de l'avis medecin et reprise du graphe
+- Generation du rapport final (ReportAgent → Supervisor → END)
+
 ### Fonctionnalites principales
 
 - Questionnaire patient en 5 questions obligatoires
