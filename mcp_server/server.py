@@ -1,19 +1,19 @@
 """
-MCP Care Guidelines Server — Standalone FastAPI-based server
-providing clinical care guidelines for the multi-agent system.
+MCP Care Guidelines Server — Dual-mode server providing clinical care guidelines.
+
+Mode 1 (default): FastAPI HTTP server on MCP_SERVER_PORT (for the REST API client).
+Mode 2 (--mcp): Official MCP SDK server over stdio (for MCP-compatible clients).
+
+Both modes share the same guidelines data and matching logic.
 """
 
 import os
+import sys
 import json
+import re
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
-
-app = FastAPI(
-    title="MCP Care Guidelines Server",
-    description="Serveur de lignes directrices de soins pour le système multi-agents médical.",
-    version="1.0.0",
-)
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 GUIDELINES_FILE = os.path.join(DATA_DIR, "care_guidelines.json")
@@ -31,7 +31,6 @@ def _load_guidelines() -> list:
 
 def _tokenize(text: str) -> set:
     """Tokenise un texte en mots clés normalisés."""
-    import re
     text = text.lower()
     text = re.sub(r"[^\w\sàâäéèêëïîôùûüÿçœæ]", " ", text)
     tokens = set(text.split())
@@ -81,6 +80,93 @@ def _match_guidelines(symptoms: str, guidelines: list) -> list:
 
     scored_guidelines.sort(key=lambda x: x["match_score"], reverse=True)
     return scored_guidelines
+
+
+# ---------------------------------------------------------------------------
+# MCP SDK server (official protocol over stdio)
+# ---------------------------------------------------------------------------
+
+def create_mcp_server():
+    """Create an MCP SDK server with care-guideline tools."""
+    from mcp.server.fastmcp import FastMCP
+
+    mcp = FastMCP(
+        "MCP Care Guidelines",
+        instructions=(
+            "Serveur MCP fournissant des lignes directrices de soins cliniques. "
+            "Utilisez l'outil 'get_care_guidelines' pour rechercher des recommandations "
+            "basées sur les symptômes du patient."
+        ),
+    )
+
+    @mcp.tool()
+    def get_care_guidelines(symptoms: str) -> str:
+        """
+        Recherche les lignes directrices de soins correspondant aux symptômes.
+        Retourne les recommandations triées par pertinence.
+
+        Args:
+            symptoms: Description des symptômes du patient en texte libre.
+        """
+        guidelines = _load_guidelines()
+        matched = _match_guidelines(symptoms, guidelines)
+
+        if not matched:
+            return json.dumps({
+                "status": "no_match",
+                "message": "Aucune ligne directrice correspondante trouvée.",
+                "guidelines": [],
+            }, ensure_ascii=False)
+
+        return json.dumps({
+            "status": "success",
+            "total_matches": len(matched),
+            "guidelines": matched,
+        }, ensure_ascii=False)
+
+    @mcp.tool()
+    def get_all_care_guidelines() -> str:
+        """
+        Retourne la liste complète de toutes les lignes directrices disponibles.
+        """
+        guidelines = _load_guidelines()
+        return json.dumps({
+            "status": "success",
+            "total_guidelines": len(guidelines),
+            "guidelines": guidelines,
+        }, ensure_ascii=False)
+
+    @mcp.tool()
+    def get_top_matches(symptoms: str) -> str:
+        """
+        Retourne les 3 meilleures correspondances de lignes directrices
+        pour les symptômes fournis.
+
+        Args:
+            symptoms: Description des symptômes du patient en texte libre.
+        """
+        guidelines = _load_guidelines()
+        matched = _match_guidelines(symptoms, guidelines)
+        top = matched[:3]
+
+        return json.dumps({
+            "status": "success",
+            "top_matches": len(top),
+            "guidelines": top,
+        }, ensure_ascii=False)
+
+    return mcp
+
+
+# ---------------------------------------------------------------------------
+# FastAPI HTTP server (REST endpoints, backward-compatible)
+# ---------------------------------------------------------------------------
+
+app = FastAPI(
+    title="MCP Care Guidelines Server",
+    description="Serveur de lignes directrices de soins pour le système multi-agents médical.",
+    version="1.0.0",
+)
 
 
 class SymptomsRequest(BaseModel):
@@ -141,7 +227,11 @@ async def match_guidelines(request: SymptomsRequest):
 
 
 if __name__ == "__main__":
-    import uvicorn
+    if "--mcp" in sys.argv:
+        mcp_server = create_mcp_server()
+        mcp_server.run()
+    else:
+        import uvicorn
 
-    port = int(os.getenv("MCP_SERVER_PORT", "8001"))
-    uvicorn.run("mcp_server.server:app", host="0.0.0.0", port=port, reload=True)
+        port = int(os.getenv("MCP_SERVER_PORT", "8001"))
+        uvicorn.run("mcp_server.server:app", host="0.0.0.0", port=port, reload=True)

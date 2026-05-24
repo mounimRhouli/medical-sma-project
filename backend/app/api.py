@@ -16,8 +16,7 @@ load_dotenv(override=True)
 
 from backend.app.graph import medical_graph, checkpointer
 from backend.app.state import MedicalState
-from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS, diagnostic_agent_node
-from backend.app.nodes.report_agent import report_agent_node
+from backend.app.nodes.diagnostic_agent import MANDATORY_QUESTIONS
 
 app = FastAPI(
     title="SMA Clinique — API d'Orientation Médicale Simulée",
@@ -144,7 +143,8 @@ async def start_consultation(request: ConsultationStartRequest):
 async def resume_consultation(request: ConsultationResumeRequest):
     """
     Reprend une consultation en cours.
-    Gère les réponses du patient et les avis du médecin.
+    Gère les réponses du patient (via mise à jour du graphe + re-streaming)
+    et les avis du médecin (via reprise HITL du graphe interrompu).
     """
     config = {"configurable": {"thread_id": request.thread_id}}
 
@@ -177,40 +177,30 @@ async def resume_consultation(request: ConsultationResumeRequest):
             if len(questions_and_answers) < 5:
                 next_question_count = len(questions_and_answers) + 1
                 next_question = MANDATORY_QUESTIONS[len(questions_and_answers)]
+                state_update = {
+                    "messages": [answer_message],
+                    "questions_and_answers": questions_and_answers,
+                    "question_count": next_question_count,
+                    "current_question": next_question,
+                    "consultation_status": "questioning",
+                }
+                medical_graph.update_state(config, state_update, as_node="diagnostic_agent")
                 new_state = dict(current_state)
-                new_state.update(
-                    {
-                        "messages": [answer_message],
-                        "questions_and_answers": questions_and_answers,
-                        "question_count": next_question_count,
-                        "current_question": next_question,
-                        "consultation_status": "questioning",
-                    }
-                )
+                new_state.update(state_update)
                 API_SESSION_STATES[request.thread_id] = new_state
             else:
-                diagnostic_state = dict(current_state)
-                diagnostic_state.update(
-                    {
-                        "messages": [answer_message],
-                        "questions_and_answers": questions_and_answers,
-                        "question_count": 5,
-                    }
-                )
-                diagnostic_result = diagnostic_agent_node(diagnostic_state)
-                new_state = dict(diagnostic_state)
-                new_state.update(
-                    {
-                        "messages": diagnostic_result.get("messages", []),
-                        "questions_and_answers": questions_and_answers,
-                        "question_count": 5,
-                        "diagnostic_summary": diagnostic_result.get("diagnostic_summary", ""),
-                        "interim_care": diagnostic_result.get("interim_care", ""),
-                        "consultation_status": diagnostic_result.get(
-                            "consultation_status", "awaiting_physician"
-                        ),
-                    }
-                )
+                state_update = {
+                    "messages": [answer_message],
+                    "questions_and_answers": questions_and_answers,
+                    "question_count": 5,
+                }
+                medical_graph.update_state(config, state_update, as_node="supervisor")
+
+                for event in medical_graph.stream(None, config=config):
+                    pass
+
+                graph_state = medical_graph.get_state(config)
+                new_state = dict(graph_state.values)
                 API_SESSION_STATES[request.thread_id] = new_state
 
             if new_state.get("consultation_status") == "awaiting_physician":
@@ -235,17 +225,20 @@ async def resume_consultation(request: ConsultationResumeRequest):
                 content=f"[Avis médecin] {request.answer}"
             )
 
-            report_state = dict(current_state)
-            report_state.update(
+            medical_graph.update_state(
+                config,
                 {
                     "messages": [physician_message],
                     "physician_treatment": request.answer,
-                }
+                },
+                as_node="physician_review",
             )
-            report_result = report_agent_node(report_state)
 
-            new_state = dict(report_state)
-            new_state.update(report_result)
+            for event in medical_graph.stream(None, config=config):
+                pass
+
+            graph_state = medical_graph.get_state(config)
+            new_state = dict(graph_state.values)
             API_SESSION_STATES[request.thread_id] = new_state
 
             if new_state.get("final_report"):

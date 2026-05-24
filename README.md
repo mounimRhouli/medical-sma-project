@@ -62,17 +62,26 @@ FASTAPI_HOST=0.0.0.0
 FASTAPI_PORT=8000
 MCP_SERVER_HOST=localhost
 MCP_SERVER_PORT=8001
+MCP_USE_SDK=false
 API_BASE_URL=http://localhost:8000
 ```
+
+`MCP_USE_SDK=true` active le protocole MCP officiel (stdio) au lieu des appels HTTP REST.
 
 Le modele LLM est lu automatiquement depuis `.env` via `backend/app/config.py`.
 
 ### Lancement
 
-Terminal 1 - MCP server:
+Terminal 1 - MCP server (mode HTTP REST):
 
 ```powershell
 .\venv\Scripts\python.exe -m uvicorn mcp_server.server:app --port 8001
+```
+
+Ou en mode protocole MCP officiel (stdio):
+
+```powershell
+.\venv\Scripts\python.exe -m mcp_server.server --mcp
 ```
 
 Terminal 2 - FastAPI:

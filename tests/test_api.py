@@ -100,8 +100,9 @@ class TestConsultationResume:
         })
         assert response.status_code == 404
 
+    @pytest.mark.integration
     def test_resume_patient_answer_advances_to_next_question(self):
-        """AprÃ¨s une rÃ©ponse patient, l'API doit retourner la question suivante."""
+        """Après une réponse patient, l'API doit retourner la question suivante."""
         session_response = client.post("/sessions/start")
         thread_id = session_response.json()["thread_id"]
 
