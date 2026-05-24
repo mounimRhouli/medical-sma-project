@@ -138,5 +138,145 @@
       "Techniques de relaxation",
       "Consultation si persistance au-delà de 2 semaines"
     ]
+  },
+  {
+    "id": 11,
+    "condition": "Diabète et troubles glycémiques",
+    "keywords": ["glycémie", "diabète", "soif excessive", "polyurie", "fatigue", "perte de poids", "sucre", "insuline", "hypoglycémie", "hyperglycémie"],
+    "guidelines": "Surveillance régulière de la glycémie si dispositif disponible. Alimentation à index glycémique bas, fractionnée en 3 repas et 2 collations. Hydratation abondante. Activité physique régulière et adaptée. En cas d'hypoglycémie (tremblements, sueurs, confusion) : ingérer immédiatement du sucre rapide. Consultation médicale indispensable pour diagnostic et suivi.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Surveillance glycémique si possible",
+      "Alimentation fractionnée et équilibrée",
+      "Hydratation régulière",
+      "Activité physique adaptée",
+      "Consultation médicale pour bilan complet"
+    ]
+  },
+  {
+    "id": 12,
+    "condition": "Troubles anxieux et dépressifs",
+    "keywords": ["anxiété", "angoisse", "dépression", "tristesse", "panique", "attaque panique", "nervosité", "irritabilité", "pleurs", "isolement", "humeur"],
+    "guidelines": "Maintenir une routine quotidienne régulière. Pratiquer des exercices de respiration profonde et de relaxation. Activité physique douce quotidienne (30 min de marche). Maintenir les liens sociaux et ne pas s'isoler. Limiter caféine et alcool. Sommeil régulier. Consultation recommandée auprès d'un professionnel de santé mentale.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Exercices de respiration et relaxation",
+      "Activité physique douce quotidienne",
+      "Maintien des liens sociaux",
+      "Routine de sommeil régulière",
+      "Consultation professionnelle recommandée"
+    ]
+  },
+  {
+    "id": 13,
+    "condition": "Réaction allergique",
+    "keywords": ["allergie", "choc anaphylactique", "gonflement", "urticaire", "difficulté respiratoire", "piqûre", "alimentaire", "médicament", "éruption", "prurit"],
+    "guidelines": "ATTENTION — URGENCE si difficultés respiratoires ou gonflement du visage/gorge. Appeler le 15/SAMU immédiatement. Éloigner l'allergène si identifié. En cas de réaction légère (urticaire localisé) : compresses fraîches, éviter de gratter. Si antécédent connu : utiliser le stylo auto-injecteur d'adrénaline si prescrit. Position assise si gêne respiratoire.",
+    "urgency": "high",
+    "recommended_actions": [
+      "Appel 15/SAMU si gêne respiratoire ou gonflement",
+      "Éloigner l'allergène identifié",
+      "Utiliser l'auto-injecteur d'adrénaline si prescrit",
+      "Position assise si difficulté respiratoire",
+      "Consultation urgente même après amélioration"
+    ]
+  },
+  {
+    "id": 14,
+    "condition": "Troubles du sommeil",
+    "keywords": ["insomnie", "sommeil", "réveil nocturne", "cauchemar", "apnée", "somnolence", "endormissement", "ronflement", "décalage horaire", "fatigue diurne"],
+    "guidelines": "Respecter des horaires de coucher et lever réguliers, y compris le week-end. Chambre fraîche (18-20°C), sombre et silencieuse. Éviter les écrans 1h avant le coucher. Pas de caféine après 14h. Pas de repas lourd le soir. Activité physique régulière mais pas en soirée. Techniques de relaxation au coucher.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Horaires de sommeil réguliers",
+      "Environnement de sommeil optimal",
+      "Limiter écrans et caféine",
+      "Techniques de relaxation",
+      "Consultation si insomnie chronique (> 3 semaines)"
+    ]
+  },
+  {
+    "id": 15,
+    "condition": "Hypertension artérielle",
+    "keywords": ["tension élevée", "hypertension", "céphalée", "vertiges", "bourdonnement", "pression artérielle", "sel", "cardio", "AVC", "saignement nez"],
+    "guidelines": "Réduction de la consommation de sel (< 6g/jour). Alimentation riche en fruits, légumes et fibres (régime DASH). Activité physique régulière (30 min/jour). Maintien d'un poids santé. Limitation de l'alcool. Gestion du stress. Surveillance régulière de la tension. Consultation médicale indispensable pour évaluation et traitement.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Réduction du sel alimentaire",
+      "Alimentation type DASH",
+      "Activité physique quotidienne",
+      "Surveillance régulière de la tension",
+      "Consultation médicale pour suivi et traitement"
+    ]
+  },
+  {
+    "id": 16,
+    "condition": "Traumatisme et blessure",
+    "keywords": ["chute", "blessure", "plaie", "fracture", "entorse", "contusion", "hématome", "coupure", "brûlure", "saignement"],
+    "guidelines": "Protocole RICE pour les entorses/contusions : Repos, Ice (glace 15-20 min), Compression, Élévation. Nettoyage soigneux des plaies à l'eau claire et au savon. En cas de saignement abondant : compression directe avec un linge propre. Immobiliser le membre si suspicion de fracture. Ne pas retirer un objet planté dans une plaie.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Protocole RICE si entorse/contusion",
+      "Nettoyage des plaies à l'eau et au savon",
+      "Compression directe si saignement",
+      "Immobilisation si suspicion de fracture",
+      "Consultation urgente si fracture ouverte, saignement incontrôlable ou traumatisme crânien"
+    ]
+  },
+  {
+    "id": 17,
+    "condition": "Troubles endocriniens thyroïdiens",
+    "keywords": ["thyroïde", "fatigue", "prise de poids", "perte de poids", "tremblements", "frilosité", "transpiration excessive", "goitre", "nervosité", "ralentissement"],
+    "guidelines": "Surveillance des symptômes : fatigue inexpliquée, variation de poids, modification du rythme cardiaque, frilosité ou transpiration excessive. Maintenir une alimentation équilibrée riche en iode (poissons, produits laitiers). Consultation médicale recommandée pour bilan thyroïdien (TSH, T3, T4) en cas de symptômes persistants.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Surveillance des symptômes évocateurs",
+      "Alimentation équilibrée riche en iode",
+      "Repos adapté en cas de fatigue",
+      "Consultation pour bilan thyroïdien",
+      "Suivi régulier si traitement en cours"
+    ]
+  },
+  {
+    "id": 18,
+    "condition": "Infections cutanées",
+    "keywords": ["abcès", "furoncle", "cellulite", "infection", "pus", "rougeur chaude", "fièvre", "gonflement douloureux", "plaie infectée", "ganglion"],
+    "guidelines": "Ne pas percer ni presser un abcès ou furoncle. Appliquer des compresses chaudes et humides 3-4 fois par jour pendant 15 minutes. Maintenir la zone propre et sèche. Ne pas partager les serviettes ou vêtements. Surveillance de l'extension de la rougeur. Consultation médicale recommandée car un traitement antibiotique peut être nécessaire.",
+    "urgency": "medium",
+    "recommended_actions": [
+      "Compresses chaudes et humides",
+      "Hygiène stricte de la zone",
+      "Ne pas percer les lésions",
+      "Surveillance de l'extension",
+      "Consultation médicale si fièvre ou extension rapide"
+    ]
+  },
+  {
+    "id": 19,
+    "condition": "Urgence respiratoire aiguë",
+    "keywords": ["asthme", "crise asthme", "suffocation", "détresse respiratoire", "sifflement", "bronchospasme", "dyspnée", "cyanose", "étouffement", "apnée"],
+    "guidelines": "ATTENTION — URGENCE. Position assise, penché en avant, bras en appui. Utiliser le bronchodilatateur d'action rapide si prescrit (2 bouffées toutes les 20 min, max 3 fois). Appeler le 15/SAMU si pas d'amélioration après 3 prises, si lèvres bleuâtres (cyanose), si difficulté à parler, ou si perte de conscience. Ne pas allonger la personne.",
+    "urgency": "high",
+    "recommended_actions": [
+      "Position assise en avant",
+      "Bronchodilatateur si prescrit",
+      "Appel 15/SAMU si pas d'amélioration",
+      "Ne jamais allonger le patient",
+      "Consultation urgente systématique après une crise"
+    ]
+  },
+  {
+    "id": 20,
+    "condition": "Troubles gastro-intestinaux chroniques",
+    "keywords": ["reflux", "brûlure estomac", "constipation", "côlon irritable", "ballonnement chronique", "acidité", "hernie hiatale", "gastrite", "colopathie", "transit"],
+    "guidelines": "Repas fractionnés et réguliers (éviter de sauter des repas). Manger lentement et bien mastiquer. Éviter les aliments déclencheurs (épicés, acides, gras, alcool, café). Surélever la tête du lit de 15 cm si reflux. Activité physique douce après les repas (marche). Gestion du stress. Apport suffisant en fibres et eau pour la constipation.",
+    "urgency": "low",
+    "recommended_actions": [
+      "Repas fractionnés et réguliers",
+      "Identification et éviction des aliments déclencheurs",
+      "Position surélevée au coucher si reflux",
+      "Hydratation et fibres pour le transit",
+      "Consultation si symptômes chroniques ou perte de poids"
+    ]
   }
 ]
