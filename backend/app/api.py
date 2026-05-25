@@ -216,14 +216,16 @@ async def resume_consultation(request: ConsultationResumeRequest):
             questions_and_answers = list(current_state.get("questions_and_answers", []))
             current_question = current_state.get("current_question", "")
 
-            questions_and_answers.append({
-                "question": current_question,
-                "answer": request.answer,
-            })
-
             answer_message = HumanMessage(
                 content=f"[Réponse patient Q{question_count}] {request.answer}"
             )
+
+            # Only append if we haven't collected all 5 answers yet
+            if len(questions_and_answers) < 5:
+                questions_and_answers.append({
+                    "question": current_question,
+                    "answer": request.answer,
+                })
 
             if len(questions_and_answers) < 5:
                 next_question_count = len(questions_and_answers) + 1
@@ -244,6 +246,7 @@ async def resume_consultation(request: ConsultationResumeRequest):
                     "messages": [answer_message],
                     "questions_and_answers": questions_and_answers,
                     "question_count": 5,
+                    "next": "diagnostic_agent",
                 }
                 medical_graph.update_state(config, state_update, as_node="supervisor")
 

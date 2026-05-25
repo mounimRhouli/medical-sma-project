@@ -434,9 +434,9 @@ def api_call(method: str, endpoint: str, json_data: dict = None, params: dict = 
     url = f"{API_BASE_URL}{endpoint}"
     try:
         if method == "GET":
-            response = requests.get(url, params=params, timeout=60)
+            response = requests.get(url, params=params, timeout=120)
         elif method == "POST":
-            response = requests.post(url, json=json_data, timeout=60)
+            response = requests.post(url, json=json_data, timeout=120)
         else:
             return {"error": f"Methode HTTP non supportee : {method}"}
 
@@ -890,13 +890,6 @@ def screen_patient_qa():
             return
 
         with st.spinner("Traitement de la reponse..."):
-            qa_list = list(st.session_state.get("questions_and_answers", []))
-            qa_list.append({
-                "question": current_question,
-                "answer": answer.strip(),
-            })
-            st.session_state["questions_and_answers"] = qa_list
-
             result = api_call("POST", "/consultation/resume", {
                 "thread_id": st.session_state["thread_id"],
                 "answer": answer.strip(),
@@ -908,6 +901,15 @@ def screen_patient_qa():
                 return
 
             status = result.get("status", "")
+
+            # Append Q&A only after successful API response
+            qa_list = list(st.session_state.get("questions_and_answers", []))
+            if len(qa_list) < 5:
+                qa_list.append({
+                    "question": current_question,
+                    "answer": answer.strip(),
+                })
+                st.session_state["questions_and_answers"] = qa_list
 
             if status == "awaiting_physician":
                 st.session_state["diagnostic_summary"] = result.get("diagnostic_summary", "")
