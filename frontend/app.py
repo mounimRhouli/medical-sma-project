@@ -4,6 +4,7 @@ Streamlit Frontend — SMA Clinique — Orientation Médicale Simulée
 """
 
 import os
+import re
 import time
 from datetime import datetime
 from html import escape
@@ -79,7 +80,8 @@ header {visibility: hidden;}
 
 /* Cards */
 .card {
-    background: #ffffff;
+    background: #ffffff !important;
+    color: #1f2937 !important;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 1.5rem;
@@ -89,6 +91,9 @@ header {visibility: hidden;}
 }
 .card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.card strong, .card em, .card span, .card p {
+    color: #1f2937 !important;
 }
 
 /* Step indicator */
@@ -178,14 +183,14 @@ header {visibility: hidden;}
 
 /* Question bubble */
 .question-bubble {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
     border: 1px solid #93c5fd;
     border-radius: 12px;
     padding: 1.2rem 1.5rem;
     margin: 1rem 0;
 }
 .question-bubble .q-label {
-    color: #1e40af;
+    color: #1e40af !important;
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -193,7 +198,7 @@ header {visibility: hidden;}
     margin-bottom: 0.4rem;
 }
 .question-bubble .q-text {
-    color: #1e3a5f;
+    color: #1e3a5f !important;
     font-size: 1.05rem;
     font-weight: 500;
     line-height: 1.5;
@@ -201,14 +206,14 @@ header {visibility: hidden;}
 
 /* QA history item */
 .qa-item {
-    background: #f9fafb;
+    background: #f9fafb !important;
     border-radius: 8px;
     padding: 0.8rem 1rem;
     margin-bottom: 0.5rem;
     border-left: 3px solid #0f766e;
 }
-.qa-item .qa-q { color: #374151; font-weight: 500; font-size: 0.85rem; }
-.qa-item .qa-a { color: #0f766e; font-size: 0.85rem; margin-top: 0.25rem; }
+.qa-item .qa-q { color: #374151 !important; font-weight: 500; font-size: 0.85rem; }
+.qa-item .qa-a { color: #0f766e !important; font-size: 0.85rem; margin-top: 0.25rem; }
 
 /* Physician section */
 .physician-header {
@@ -243,21 +248,21 @@ header {visibility: hidden;}
     margin: 0;
 }
 .summary-diag {
-    background: #eff6ff;
+    background: #eff6ff !important;
     border: 1px solid #bfdbfe;
 }
-.summary-diag h5 { color: #1e40af; }
-.summary-diag p { color: #1e3a5f; }
+.summary-diag h5 { color: #1e40af !important; }
+.summary-diag p { color: #1e3a5f !important; }
 .summary-care {
-    background: #f0fdf4;
+    background: #f0fdf4 !important;
     border: 1px solid #bbf7d0;
 }
-.summary-care h5 { color: #166534; }
-.summary-care p { color: #14532d; }
+.summary-care h5 { color: #166534 !important; }
+.summary-care p { color: #14532d !important; }
 
 /* Report section */
 .report-section {
-    background: #ffffff;
+    background: #ffffff !important;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 1.5rem;
@@ -271,14 +276,14 @@ header {visibility: hidden;}
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #0f766e;
+    color: #0f766e !important;
     font-weight: 600;
     margin-bottom: 0.6rem;
     padding-bottom: 0.4rem;
     border-bottom: 2px solid #ccfbf1;
 }
 .report-section-body {
-    color: #374151;
+    color: #374151 !important;
     font-size: 0.9rem;
     line-height: 1.7;
 }
@@ -291,7 +296,7 @@ header {visibility: hidden;}
 }
 .metric-card {
     flex: 1;
-    background: #ffffff;
+    background: #ffffff !important;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 1rem 1.2rem;
@@ -300,11 +305,11 @@ header {visibility: hidden;}
 .metric-card .metric-value {
     font-size: 1.4rem;
     font-weight: 700;
-    color: #0f766e;
+    color: #0f766e !important;
 }
 .metric-card .metric-label {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #6b7280 !important;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -483,6 +488,28 @@ def _pdf_text(value) -> str:
     return escape(text).replace("\n", "<br/>")
 
 
+def _md_to_html(text: str) -> str:
+    """Convert basic markdown formatting to HTML for display in Streamlit."""
+    if not text:
+        return ""
+    safe = escape(text)
+    safe = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', safe)
+    safe = re.sub(r'\*(.+?)\*', r'<em>\1</em>', safe)
+    safe = safe.replace("\n\n", "</p><p>").replace("\n", "<br>")
+    return f"<p>{safe}</p>"
+
+
+def _pdf_md_to_rl(text: str) -> str:
+    """Convert markdown bold/italic to ReportLab XML tags."""
+    if not text:
+        return "N/A"
+    safe = escape(text)
+    safe = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', safe)
+    safe = re.sub(r'\*(.+?)\*', r'<i>\1</i>', safe)
+    safe = safe.replace("\n", "<br/>")
+    return safe
+
+
 def build_report_pdf(report_json: dict, thread_id: str) -> bytes:
     """Build a professional PDF version of the final clinical report."""
     buffer = BytesIO()
@@ -630,21 +657,21 @@ def build_report_pdf(report_json: dict, thread_id: str) -> bytes:
             ]
         )
     qa_table = Table(qa_rows, colWidths=[1.0 * cm, 7.2 * cm, 7.6 * cm], repeatRows=1)
-    qa_table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#ccfbf1")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#134e4a")),
-                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#99f6e4")),
-                ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#ccfbf1")),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 6),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-            ]
-        )
-    )
+    qa_style_cmds = [
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#ccfbf1")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#134e4a")),
+        ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#99f6e4")),
+        ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#ccfbf1")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]
+    for row_idx in range(1, len(qa_rows)):
+        if row_idx % 2 == 0:
+            qa_style_cmds.append(("BACKGROUND", (0, row_idx), (-1, row_idx), colors.HexColor("#f0fdfa")))
+    qa_table.setStyle(TableStyle(qa_style_cmds))
     story.append(qa_table)
 
     sections = [
@@ -655,7 +682,7 @@ def build_report_pdf(report_json: dict, thread_id: str) -> bytes:
     ]
     for title, content in sections:
         story.append(Paragraph(title, section_style))
-        story.append(Paragraph(_pdf_text(content), body_style))
+        story.append(Paragraph(_pdf_md_to_rl(str(content)), body_style))
 
     story.append(Spacer(1, 8))
     story.append(
@@ -979,7 +1006,7 @@ def screen_physician_review():
             st.markdown(
                 f'<div class="summary-card summary-diag">'
                 f'<h5>Synthese clinique preliminaire</h5>'
-                f'<p>{diagnostic}</p>'
+                f'{_md_to_html(diagnostic)}'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -989,7 +1016,7 @@ def screen_physician_review():
             st.markdown(
                 f'<div class="summary-card summary-care">'
                 f'<h5>Recommandation intermediaire</h5>'
-                f'<p>{interim}</p>'
+                f'{_md_to_html(interim)}'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -1105,7 +1132,7 @@ def screen_final_report():
         st.markdown(
             f'<div class="report-section">'
             f'<div class="report-section-title">{title}</div>'
-            f'<div class="report-section-body">{content}</div>'
+            f'<div class="report-section-body">{_md_to_html(str(content))}</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
